@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:justify-content="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>请求日志</title>
+    <link rel="shortcut icon" href="../../static/ico/favicon.ico" th:href="@{/static/ico/favicon.ico}">
+    <!--导入bootstrap的主样式-->
+    <link href="../../static/css/bootstrap.min.css" th:href="@{/static/css/bootstrap.min.css}" rel="stylesheet">
+    <style type="text/css">
+        .xs-img-thumbnail {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <!--<div class="container-fluid">-->
+    <div class="container">
+        <!-- 做当视窗的大小小于 768px 时，把导航栏收缩起来的样式 -->
+        <div class="navbar-header">
+            <!-- 整个导航栏收缩后形成的一个按钮 -->
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#my_nav">
+                <span class="sr-only">针对特殊设备</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <!--<span class="glyphicon glyphicon-search"></span>-->
+            </button>
+            <!-- 如果想显示品牌的图片，这里可以把文件替换成 img src="图片位置" -->
+            <a href="#" class="navbar-brand">品牌LOGO</a>
+        </div>
+
+        <!-- navbar中的内容 -->
+        <ul class="nav navbar-nav navbar-right">
+            <li class="navbar-text" th:inline="text">Welcome, [[${session.LOGIN_USER.realName}]]</li>
+            <li><a href="../user/login.html" th:href="@{/user/logout}">退出</a></li>
+        </ul>
+
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <button class="btn btn-success" id="deleteAll">删除所有</button>
+            <a type="button" class="btn btn-success" id="log" th:href="@{/book/toList}">查看图书</a>
+        </div>
+        <div class="col-md-8 text-right">
+            <form class="form-inline" th:action="@{/log/search.do}" action="#" method="get">
+                <div class="form-group">
+                    <div class="input-group">
+                        <!-- 自定义搜索框的宽度：请自行在 form-control样式后添加 width -->
+                        <input type="search" class="form-control" name="search" placeholder="请输入要查询的日志关键字"
+                               style="width: 300px;" th:value="${search}">
+                        <input type="text" name="currentPage" value="1" hidden="hidden">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary" id="searchBtn"><span
+                                class="glyphicon glyphicon-search"></span></button>
+                    </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 添加一条水平分割线 -->
+    <hr/>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped table-hover">
+                <tr>
+                    <th>
+                        <!-- 复选框 -->
+                        <input type="checkbox" name="select-all" id="select-all" value="all">
+                    </th>
+                    <th>序号</th>
+                    <th>请求发起人</th>
+                    <th>请求URL</th>
+                    <th>请求时间</th>
+                    <th>请求耗时</th>
+                </tr>
+
+                <tr th:each="requestLog,vs: ${LOG_LIST}">
+                    <td> <!-- 复选框 -->
+                        <input type="checkbox" name="flags" th:value="${requestLog.id}">
+                    </td>
+                    <td th:text="${vs.count}">1</td>
+                    <td th:text="${requestLog.requestPromoter}">请求发起人</td>
+                    <td th:text="${requestLog.requestUrl}">请求URL</td>
+                    <td th:text="${#temporals.format(requestLog.requestDate, 'yyyy-MM-dd HH:mm:ss')}">请求时间</td>
+                    <td th:text="${requestLog.requestDuration}+'ms'">请求耗时</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li>
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=1,search=${search})}" aria-label="First">
+                    <span  aria-hidden="true">首页</span>
+                </a>
+            </li>
+            <li th:class="${PAGE.getCurrent()==1?'disabled':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}-1,search=${search})}" aria-label="Previous">
+                    <span  aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li th:class="${PAGE.getCurrent()<=2?'disabled':''}" th:style="'display:'+${PAGE.getCurrent()<=2?'none':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}-2,search=${search})}"  th:text="${PAGE.getCurrent()}-2"></a>
+            </li>
+            <li th:class="${PAGE.getCurrent()==1?'disabled':''}" th:style="'display:'+${PAGE.getCurrent()<=1?'none':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}-1,search=${search})}"  th:text="${PAGE.getCurrent()}-1"></a>
+            </li>
+            <li>
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent},search=${search})}"  th:text="${PAGE.getCurrent()}"></a>
+            </li>
+<!--            th:class="${PAGE.getCurrent()==''?'disabled':''}"-->
+            <li th:style="'display:'+${PAGE.getCurrent()>=PAGE.getPages()?'none':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}+1,search=${search})}"  th:text="${PAGE.getCurrent()}+1"></a>
+            </li>
+            <li th:style="'display:'+${PAGE.getCurrent()>=PAGE.getPages()-1?'none':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}+2,search=${search})}"  th:text="${PAGE.getCurrent()}+2"></a>
+            </li>
+            <li th:style="'display:'+${PAGE.getCurrent()>=PAGE.getPages()?'none':''}">
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getCurrent}+1,search=${search})}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/log/{uri}(uri=${uri},currentPage=${PAGE.getPages()},search=${search})}" aria-label="First">
+                    <span  aria-hidden="true">末页</span>
+                </a>
+            </li>
+
+        </ul>
+        <div class="row">
+            当前第<span th:text="${PAGE.getCurrent()}" style="display: inline-block">1</span>页；每页
+            <span th:text="${PAGE.getSize()}" style="display: inline-block">15</span>条；总共
+            <span th:text="${PAGE.getPages()}" style="display: inline-block">1</span>页
+        </div>
+
+    </nav>
+</div>
+
+<!-- 导入js文件 -->
+<script type="text/javascript" src="../../static/js/jquery.min.js" th:src="@{/static/js/jquery.min.js}"></script>
+<script type="text/javascript" src="../../static/js/bootstrap.min.js" th:src="@{/static/js/bootstrap.min.js}"></script>
+<script th:inline="javascript">
+    //jquery的入口
+    $(function () {
+        //0. 获取应用名
+        var appName = [[${#request.getContextPath()}]];
+        console.log("appName: " + appName);
+
+        //1. 获取复选框的控制按钮，并添加事件
+        $("#select-all").change(function () {
+            //选出所有的复选框【不含 #select-all】
+            $(":checkbox").not("#select-all").prop("checked", $("#select-all").prop("checked"));
+        });
+
+        //2. 给删除所选  按钮添加 单击事件
+        $("#deleteAll").click(function () {
+            //定义一个变量来保存是否有 选中的复选框
+            var isSelect = false;
+            //定义 一个变量来存储用户选中的复选框 的值
+            var queryData = "";   //格式是： key=value1&key=value2&key=value3
+            var datas = [];
+            //针对所有的复选框进行迭代
+            $(":checkbox").not("#select-all").each(function (index, item) {
+                isSelect = isSelect || $(item).prop("checked");
+                // 只要是被选中的，就取出它的值
+                if ($(item).prop("checked")) {
+                    queryData = (queryData + "flags=" + $(item).val() + "&");
+                    //
+                    datas.push($(item).val());
+                }
+            });
+            //把queryData中的最后一个 & 给删除掉
+            queryData = queryData.substring(0, queryData.length - 1);
+            //
+            console.log(queryData);
+            //把数组转换成 json 字符串
+            var datasJson = JSON.stringify(datas);
+            console.log(datasJson);
+
+            //判断
+            if (!isSelect) {
+                //说明没有选中任何一个
+                alert("至少要选中一个");
+            } else {
+                //说明有选中，继续提示真的要删除吗
+                if (confirm("确定要删除选中的图书吗？")) {
+                    //执行删除操作 ... 使用 ajax 来发送异步删除的请求
+                    $.ajax({
+                        //url: "${pageContext.request.contextPath}/book/deleteSelect.do?"+queryData,
+                        url: appName + "/log/deleteSelect.do",
+                        method: "post",
+                        data: datasJson,
+                        async: true,
+                        dataType: "text",   //表示期望服务端返回给我们的数据格式
+                        contentType: "application/json",  //客户端给服务端的格式
+                        success: function (data) {
+                            //成功
+                            alert(data);
+                            //重新加载本页面
+                            window.location.reload();
+                        },
+                        error: function (jqXHR) {
+                            // 失败
+                            alert("删除失败了");
+                        }
+                    });
+                }
+            }
+        }); //
+
+
+    });
+
+</script>
+</body>
+</html>
