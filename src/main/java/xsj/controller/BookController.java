@@ -49,9 +49,6 @@ public class BookController {
         if(bindingResult.hasErrors()){
             //说明验证没有通过，则把错误信息绑定前端的页面
             final List<FieldError> fieldErrors=bindingResult.getFieldErrors();
-            for(FieldError fe : fieldErrors){
-                System.out.println(fe.getField()+"=>"+fe.getDefaultMessage());
-            }
             return R.validError(fieldErrors);
         }else {
             System.out.println(book.toString());

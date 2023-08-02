@@ -6,10 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 @Slf4j
-//@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @SpringBootApplication
 @ServletComponentScan
-//@MapperScan("com.mapper")
 public class BookManageApplication {
     public static void main(String[] args) {
         SpringApplication.run(BookManageApplication.class,args);

@@ -41,7 +41,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //返回
         return lvfb;
     }
-
     /**
      * 用来指定验证时要读取的文件
      * @return
